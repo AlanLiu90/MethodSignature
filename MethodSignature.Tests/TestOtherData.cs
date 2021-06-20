@@ -6,17 +6,21 @@ using System.Threading.Tasks;
 
 namespace MethodSignature.Tests
 {
+#pragma warning disable 0649
     class TestType
     {
         public string Name;
     }
+#pragma warning restore 0649
 
     class TestOtherData
     {
+#pragma warning disable 0649
         public class NestedTestType
         {
             public string Name;
         }
+#pragma warning restore 0649
 
         public static void TestRefArg(ref int arg)
         {
@@ -101,11 +105,6 @@ namespace MethodSignature.Tests
         }
 
         public static void TestValueTupleArg((int, string) arg)
-        {
-
-        }
-
-        public static void TestNamedValueTupleArg((int id, string name) arg)
         {
 
         }

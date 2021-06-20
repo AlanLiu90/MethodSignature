@@ -159,13 +159,6 @@ namespace MethodSignature.Tests
         }
 
         [Test]
-        public void TestNamedValueTupleArg()
-        {
-            MethodInfo method = typeof(TestOtherData).GetMethod("TestNamedValueTupleArg", bindingFlags);
-            Assert.AreEqual("void TestNamedValueTupleArg((int id, string name) arg)", SignatureHelper.FromMethod(method));
-        }
-
-        [Test]
         public void TestValueTupleReturn()
         {
             MethodInfo method = typeof(TestOtherData).GetMethod("TestValueTupleReturn", bindingFlags);

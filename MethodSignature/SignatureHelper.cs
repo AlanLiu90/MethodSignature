@@ -37,11 +37,11 @@ namespace MethodSignature
         private static readonly Lazy<Type> isReadOnlyAttributeType 
             = new Lazy<Type>(() =>
             {
-                foreach (var assemblyRef in Assembly.GetEntryAssembly().GetReferencedAssemblies())
+                foreach (AssemblyName assemblyRef in Assembly.GetEntryAssembly().GetReferencedAssemblies())
                 {
                     if (assemblyRef.Name == "System.Runtime")
                     {
-                        var assembly = Assembly.Load(assemblyRef);
+                        Assembly assembly = Assembly.Load(assemblyRef);
                         Type type = assembly.GetType(IsReadOnlyAttribute);
                         return type;
                     }
@@ -154,7 +154,7 @@ namespace MethodSignature
         {
             sb.Append("(");
 
-            var parameters = method.GetParameters();
+            ParameterInfo[] parameters = method.GetParameters();
             for (int i = 0; i < parameters.Length; ++i)
             {
                 if (i > 0)
@@ -208,7 +208,7 @@ namespace MethodSignature
                 return;
             }
 
-            var underlyingType = Nullable.GetUnderlyingType(type);
+            Type underlyingType = Nullable.GetUnderlyingType(type);
             if (underlyingType != null)
             {
                 WriteType(underlyingType, option, sb);
@@ -238,18 +238,18 @@ namespace MethodSignature
                 return;
             }
 
-            if (keywords.TryGetValue(type, out var name))
+            if (keywords.TryGetValue(type, out string name))
             {
                 sb.Append(name);
                 return;
             }
 
-            WriteQualifiedTypeName(type, null, option, sb);
+            WriteQualifiedTypeName(type, Array.Empty<Type>(), option, sb);
         }
 
         private static void WriteQualifiedTypeName(Type type, Type[] typeArgs, SignatureOption option, StringBuilder sb)
         {
-            if (!string.IsNullOrEmpty(type.Namespace))
+            if (!string.IsNullOrEmpty(type.Namespace) && !IgnoreNamespace(type))
             {
                 if (option.WithSystemNamespace)
                 {
@@ -271,24 +271,20 @@ namespace MethodSignature
                     WriteDeclaringType(type.DeclaringType, typeArgs, ref typeArgStart, option, sb);
             }
 
-            if (typeArgs != null && typeArgStart < typeArgs.Length)
-                sb.Append(type.Name.Substring(0, type.Name.LastIndexOf(GenericTypeCharacter)));
-            else
-                sb.Append(type.Name);
-
-            if (typeArgs != null && typeArgStart < typeArgs.Length)
+            if (typeArgStart < typeArgs.Length)
             {
-                sb.Append("<");
-
-                for (int i = 0; i < typeArgs.Length - typeArgStart; ++i)
+                if (IsValueTuple(type))
                 {
-                    if (i > 0)
-                        sb.Append(", ");
-
-                    WriteType(typeArgs[i + typeArgStart], option, sb);
+                    WriteValueTupleType(type, typeArgs, option, sb);
                 }
-
-                sb.Append(">");
+                else
+                {
+                    WriteGenericType(type, typeArgs, typeArgStart, typeArgs.Length - typeArgStart, option, sb);
+                }
+            }
+            else
+            {
+                sb.Append(type.Name);
             }
         }
 
@@ -303,19 +299,7 @@ namespace MethodSignature
 
                 if (typeArgCount > 0)
                 {
-                    sb.Append(type.Name.Substring(0, type.Name.LastIndexOf(GenericTypeCharacter)));
-
-                    sb.Append("<");
-
-                    for (int i = 0; i < typeArgCount; ++i)
-                    {
-                        if (i > 0)
-                            sb.Append(", ");
-
-                        WriteType(typeArgs[i + typeArgStart], option, sb);
-                    }
-
-                    sb.Append(">");
+                    WriteGenericType(type, typeArgs, typeArgStart, typeArgCount, option, sb);
 
                     typeArgStart += typeArgCount;
                 }
@@ -330,6 +314,40 @@ namespace MethodSignature
             {
                 sb.AppendFormat("{0}.", type.Name);
             }            
+        }
+
+        private static void WriteGenericType(Type type, Type[] typeArgs, int start, int count, SignatureOption option, StringBuilder sb)
+        {
+            sb.Append(type.Name.Substring(0, type.Name.LastIndexOf(GenericTypeCharacter)));
+
+            sb.Append("<");
+
+            for (int i = 0; i < count; ++i)
+            {
+                if (i > 0)
+                    sb.Append(", ");
+
+                WriteType(typeArgs[i + start], option, sb);
+            }
+
+            sb.Append(">");
+        }
+
+        private static void WriteValueTupleType(Type type, Type[] typeArgs, SignatureOption option, StringBuilder sb)
+        {
+            FieldInfo[] fields = type.GetFields();
+
+            sb.Append("(");
+
+            for (int i = 0; i < fields.Length; ++i)
+            {
+                if (i > 0)
+                    sb.Append(", ");
+
+                WriteType(typeArgs[i], option, sb);
+            }
+
+            sb.Append(")");
         }
 
         private static void WriteDefaultValue(object value, bool isGenericParameter, SignatureOption option, StringBuilder sb)
@@ -375,6 +393,19 @@ namespace MethodSignature
                 else
                     sb.Append("null");
             }
+        }
+
+        private static bool IgnoreNamespace(Type type)
+        {
+            if (IsValueTuple(type))
+                return true;
+
+            return false;
+        }
+
+        private static bool IsValueTuple(Type type)
+        {
+            return type.FullName.StartsWith("System.ValueTuple");
         }
     }
 }
