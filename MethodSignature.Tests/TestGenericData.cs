@@ -101,4 +101,20 @@ namespace MethodSignature.Tests
             }
         }
     }
+
+    class TestGenericData7<T>
+    {
+        public class TestGenericData8
+        {
+            public class NestedTestType<U>
+            {
+
+            }
+
+            public static void TestUserDefinedNestedType(NestedTestType<bool> arg)
+            {
+
+            }
+        }
+    }
 }

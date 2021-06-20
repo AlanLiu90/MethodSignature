@@ -119,5 +119,37 @@ namespace MethodSignature.Tests
             Assert.AreEqual("void TestUserDefinedNestedType(TestGenericData5.TestGenericData6<TestGenericData.NestedTestType>.NestedTestType arg)",
                 SignatureHelper.FromMethod(method, new SignatureOption { WithDeclaringType = true }));
         }
+
+        [Test]
+        public void TestGeneric14()
+        {
+            MethodInfo method = typeof(TestGenericData1<int>).GetMethod("TestUserDefinedNestedType", bindingFlags);
+            Assert.AreEqual("void TestUserDefinedNestedType(NestedTestType arg)",
+                SignatureHelper.FromMethod(method));
+        }
+
+        [Test]
+        public void TestGeneric15()
+        {
+            MethodInfo method = typeof(TestGenericData7<int>.TestGenericData8).GetMethod("TestUserDefinedNestedType", bindingFlags);
+            Assert.AreEqual("void TestUserDefinedNestedType(TestGenericData7<int>.TestGenericData8.NestedTestType<bool> arg)",
+                SignatureHelper.FromMethod(method, new SignatureOption { WithDeclaringType = true }));
+        }
+
+        [Test]
+        public void TestGeneric16()
+        {
+            MethodInfo method = typeof(TestGenericData7<int>.TestGenericData8).GetMethod("TestUserDefinedNestedType", bindingFlags);
+            Assert.AreEqual("void TestUserDefinedNestedType(NestedTestType<bool> arg)",
+                SignatureHelper.FromMethod(method));
+        }
+
+        [Test]
+        public void TestGeneric17()
+        {
+            MethodInfo method = typeof(TestGenericData7<int>.TestGenericData8).GetMethod("TestUserDefinedNestedType", bindingFlags);
+            Assert.AreEqual("void TestUserDefinedNestedType(MethodSignature.Tests.TestGenericData7<int>.TestGenericData8.NestedTestType<bool> arg)",
+                SignatureHelper.FromMethod(method, new SignatureOption { WithNonSystemNamespace = true }));
+        }
     }
 }

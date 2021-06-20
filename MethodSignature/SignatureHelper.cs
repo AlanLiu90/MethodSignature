@@ -249,26 +249,39 @@ namespace MethodSignature
 
         private static void WriteQualifiedTypeName(Type type, Type[] typeArgs, SignatureOption option, StringBuilder sb)
         {
+            bool withNamespace = false;
             if (!string.IsNullOrEmpty(type.Namespace) && !IgnoreNamespace(type))
             {
                 if (option.WithSystemNamespace)
                 {
                     if (type.Namespace.StartsWith("System"))
-                        sb.AppendFormat("{0}.", type.Namespace);
+                        withNamespace = true;
                 }
                 else if (option.WithNonSystemNamespace)
                 {
                     if (!type.Namespace.StartsWith("System"))
-                        sb.AppendFormat("{0}.", type.Namespace);
+                        withNamespace = true;
                 }
+
+                if (withNamespace)
+                    sb.AppendFormat("{0}.", type.Namespace);
             }
 
             int typeArgStart = 0;
-            
-            if (option.WithDeclaringType)
+
+            if (type.IsNested)
             {
-                if (type.IsNested)
+                if (option.WithDeclaringType || withNamespace)
+                {
                     WriteDeclaringType(type.DeclaringType, typeArgs, ref typeArgStart, option, sb);
+                }
+                else
+                {
+                    if (type.DeclaringType.IsGenericType)
+                    {
+                        typeArgStart = type.DeclaringType.GetGenericArguments().Length;
+                    }
+                }
             }
 
             if (typeArgStart < typeArgs.Length)
