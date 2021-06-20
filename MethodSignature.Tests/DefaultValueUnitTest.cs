@@ -17,10 +17,17 @@ namespace MethodSignature.Tests
         }
 
         [Test]
-        public void TestBoolArg()
+        public void TestBoolArgTrue()
         {
-            MethodInfo method = typeof(TestDefaultValueData).GetMethod("TestBoolArg", bindingFlags);
-            Assert.AreEqual("void TestBoolArg(bool arg = true)", SignatureHelper.FromMethod(method));
+            MethodInfo method = typeof(TestDefaultValueData).GetMethod("TestBoolArgTrue", bindingFlags);
+            Assert.AreEqual("void TestBoolArgTrue(bool arg = true)", SignatureHelper.FromMethod(method));
+        }
+
+        [Test]
+        public void TestBoolArgFalse()
+        {
+            MethodInfo method = typeof(TestDefaultValueData).GetMethod("TestBoolArgFalse", bindingFlags);
+            Assert.AreEqual("void TestBoolArgFalse(bool arg = false)", SignatureHelper.FromMethod(method));
         }
 
         [Test]
@@ -35,6 +42,13 @@ namespace MethodSignature.Tests
         {
             MethodInfo method = typeof(TestDefaultValueData).GetMethod("TestFloatArg", bindingFlags);
             Assert.AreEqual("void TestFloatArg(float arg = 6.5f)", SignatureHelper.FromMethod(method));
+        }
+
+        [Test]
+        public void TestDoubleArg()
+        {
+            MethodInfo method = typeof(TestDefaultValueData).GetMethod("TestDoubleArg", bindingFlags);
+            Assert.AreEqual("void TestDoubleArg(double arg = -2.4)", SignatureHelper.FromMethod(method));
         }
 
         [Test]

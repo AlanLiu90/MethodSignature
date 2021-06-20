@@ -6,7 +6,12 @@ namespace MethodSignature.Tests
 {
     class TestDefaultValueData
     {
-        public static void TestBoolArg(bool arg = true)
+        public static void TestBoolArgTrue(bool arg = true)
+        {
+
+        }
+
+        public static void TestBoolArgFalse(bool arg = false)
         {
 
         }
@@ -17,6 +22,11 @@ namespace MethodSignature.Tests
         }
 
         public static void TestFloatArg(float arg = 6.5f)
+        {
+
+        }
+
+        public static void TestDoubleArg(double arg = -2.4)
         {
 
         }
